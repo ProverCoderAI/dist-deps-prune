@@ -34,6 +34,29 @@ npx @prover-coder-ai/dist-deps-prune release --dist ./dist --package ./package.j
 npx @prover-coder-ai/dist-deps-prune restore --package ./package.json
 ```
 
+## CI/CD (Release workflow)
+
+Use the tool during release so only the `dist/`-used dependencies stay in the published package.
+Below is a minimal GitHub Actions snippet that builds, prunes, publishes, and restores automatically:
+
+```yaml
+- name: Build dist
+  run: pnpm build
+
+- name: Publish with dist-deps-prune (auto restore)
+  run: |
+    npx @prover-coder-ai/dist-deps-prune release \
+      --dist ./dist \
+      --package ./package.json \
+      --prune-dev true \
+      --command "npm publish" \
+      --silent
+  env:
+    NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+If you already run a publish command (e.g., `changeset-publish`), just put it into `--command`.
+
 ## Notes
 
 - Supports ESM + CJS static imports in `.js/.mjs/.cjs/.d.ts`.
