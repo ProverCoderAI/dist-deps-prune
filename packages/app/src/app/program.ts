@@ -9,11 +9,12 @@ import * as Exit from "effect/Exit"
 import type { CliArgs } from "../core/cli.js"
 import { parseCliArgs } from "../core/cli.js"
 import { resolveConfig } from "../core/config.js"
-import type { AppError } from "../core/errors.js"
+import { devDependencyInDist, type AppError } from "../core/errors.js"
 import type { PrunePlan } from "../core/prune.js"
 import { buildPrunePlan } from "../core/prune.js"
 import { buildReport, renderHumanReport, renderJsonReport } from "../core/report.js"
 import type { Report } from "../core/types.js"
+import { listDevDependenciesUsedInDist } from "../core/invariants.js"
 import { loadBuiltinModules } from "../shell/builtins.js"
 import { runCommand } from "../shell/command.js"
 import { loadConfigFile } from "../shell/config-file.js"
@@ -114,6 +115,10 @@ const analyzeProject = (
       })
     )
     const pkg = yield* _(readPackageJson(cli.packagePath))
+    const usedInDev = listDevDependenciesUsedInDist(scan.used, pkg)
+    if (usedInDev.length > 0) {
+      return yield* _(Effect.fail(devDependencyInDist(usedInDev)))
+    }
     const plan = buildPrunePlan(pkg, {
       used: scan.used,
       keep: new Set(resolved.keep),

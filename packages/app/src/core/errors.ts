@@ -22,6 +22,11 @@ export type CommandFailed = {
   readonly exitCode: number
 }
 export type RestoreError = { readonly _tag: "RestoreError"; readonly message: string }
+export type DevDependencyInDist = {
+  readonly _tag: "DevDependencyInDist"
+  readonly packages: ReadonlyArray<string>
+  readonly message: string
+}
 
 export type AppError =
   | CliError
@@ -32,6 +37,7 @@ export type AppError =
   | ParseFileError
   | CommandFailed
   | RestoreError
+  | DevDependencyInDist
 
 export const configError = (message: string): ConfigError => ({
   _tag: "ConfigError",
@@ -63,4 +69,14 @@ export const commandFailed = (command: string, exitCode: number): CommandFailed 
 export const restoreError = (message: string): RestoreError => ({
   _tag: "RestoreError",
   message
+})
+
+export const devDependencyInDist = (
+  packages: ReadonlyArray<string>
+): DevDependencyInDist => ({
+  _tag: "DevDependencyInDist",
+  packages,
+  message:
+    `dist imports packages from devDependencies: ${packages.join(", ")}\n` +
+    "Move them to dependencies (runtime) or peerDependencies (plugin/host), then retry."
 })
