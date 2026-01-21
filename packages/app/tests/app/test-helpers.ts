@@ -1,9 +1,7 @@
 import { NodeContext } from "@effect/platform-node"
 import type { PlatformError } from "@effect/platform/Error"
-import type { FileSystem as FileSystemService } from "@effect/platform/FileSystem"
-import { FileSystem } from "@effect/platform/FileSystem"
-import type { Path as PathService } from "@effect/platform/Path"
-import { Path } from "@effect/platform/Path"
+import { FileSystem, type FileSystem as FileSystemService } from "@effect/platform/FileSystem"
+import { Path, type Path as PathService } from "@effect/platform/Path"
 import { Effect } from "effect"
 
 export interface TempContext {
