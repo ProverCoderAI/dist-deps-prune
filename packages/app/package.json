@@ -1,8 +1,11 @@
 {
-  "name": "@effect-template/app",
+  "name": "dist-deps-prune",
   "version": "1.0.0",
-  "description": "Minimal Vite-powered TypeScript console starter using Effect",
+  "description": "CLI to prune unused dependencies based on dist output",
   "main": "dist/main.js",
+  "bin": {
+    "dist-deps-prune": "dist/main.js"
+  },
   "directories": {
     "doc": "doc"
   },
@@ -20,21 +23,24 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ProverCoderAI/effect-template.git"
+    "url": "git+https://github.com/ProverCoderAI/dist-deps-prune.git"
   },
   "keywords": [
-    "effect",
-    "typescript",
-    "vite",
-    "console"
+    "cli",
+    "dependencies",
+    "dist",
+    "prune"
   ],
   "author": "",
   "license": "ISC",
   "type": "module",
-  "bugs": {
-    "url": "https://github.com/ProverCoderAI/effect-template/issues"
+  "publishConfig": {
+    "access": "public"
   },
-  "homepage": "https://github.com/ProverCoderAI/effect-template#readme",
+  "bugs": {
+    "url": "https://github.com/ProverCoderAI/dist-deps-prune/issues"
+  },
+  "homepage": "https://github.com/ProverCoderAI/dist-deps-prune#readme",
   "packageManager": "pnpm@10.28.1",
   "dependencies": {
     "@effect/cli": "^0.73.0",
@@ -50,7 +56,8 @@
     "@effect/typeclass": "^0.38.0",
     "@effect/workflow": "^0.16.0",
     "effect": "^3.19.14",
-    "ts-morph": "^27.0.2"
+    "ts-morph": "^27.0.2",
+    "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",
@@ -79,7 +86,6 @@
     "@vitest/eslint-plugin": "^1.6.6",
     "globals": "^17.0.0",
     "jscpd": "^4.0.7",
-    "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vite-tsconfig-paths": "^6.0.4",
     "vitest": "^4.0.17"

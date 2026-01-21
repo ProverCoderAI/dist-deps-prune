@@ -1,7 +1,9 @@
 name: Release
 on:
-  push:
+  workflow_run:
+    workflows: ["Check"]
     branches: [main]
+    types: [completed]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,19 +15,135 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    if: github.event.workflow_run.conclusion == 'success'
     permissions:
       contents: write
       id-token: write
       pull-requests: write
+      packages: write
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
       - name: Install dependencies
         uses: ./.github/actions/setup
-      - name: Create Release Pull Request or Publish
-        uses: changesets/action@v1
-        with:
-          version: pnpm changeset-version
-          publish: pnpm changeset-publish
+      - name: Auto changeset (patch if no changeset exists)
+        id: auto_changeset
+        if: github.actor != 'github-actions[bot]'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ls .changeset/*.md >/dev/null 2>&1; then
+            echo "has_changeset=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          CHANGESET_FILE=".changeset/auto-${{ github.sha }}.md"
+          printf '%s\n' \
+            '---' \
+            '"dist-deps-prune": patch' \
+            '---' \
+            '' \
+            'chore: automated version bump' \
+            > "$CHANGESET_FILE"
+          echo "has_changeset=true" >> "$GITHUB_OUTPUT"
+      - name: Version packages
+        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
+        run: pnpm changeset version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Read version
+        id: release_version
+        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./packages/app/package.json').version")"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Commit version changes
+        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(release): version packages"
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          if [ -z "${BRANCH}" ]; then
+            BRANCH="main"
+          fi
+          git push origin "HEAD:${BRANCH}"
+      - name: Tag release
+        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.release_version.outputs.version }}"
+          TAG="v${VERSION}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists"
+            exit 0
+          fi
+          git tag -a "$TAG" -m "$TAG"
+          git push origin "$TAG"
+      - name: Prepare package README
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp README.md packages/app/README.md
+      - name: Configure npm auth
+        if: github.actor != 'github-actions[bot]'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${NPM_TOKEN:-}" ]; then
+            echo "NPM_TOKEN is not set"
+            exit 1
+          fi
+          printf '%s\n' "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > "$HOME/.npmrc"
+        env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p "require('./packages/app/package.json').version")"
+          if npm view dist-deps-prune@"${VERSION}" version >/dev/null 2>&1; then
+            echo "Version ${VERSION} already published; skipping npm publish."
+            exit 0
+          fi
+          pnpm changeset-publish
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to GitHub Packages
+        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
+        shell: bash
+        run: |
+          set -euo pipefail
+          OWNER="${{ github.repository_owner }}"
+          OWNER_LOWER="$(printf '%s' "$OWNER" | tr '[:upper:]' '[:lower:]')"
+          PKG_NAME="$(node -p "require('./packages/app/package.json').name")"
+          PKG_SUFFIX="${PKG_NAME#*/}"
+          if [ "$PKG_SUFFIX" = "$PKG_NAME" ]; then
+            GH_PKG="@${OWNER_LOWER}/${PKG_NAME}"
+          else
+            GH_PKG="@${OWNER_LOWER}/${PKG_SUFFIX}"
+          fi
+          export GH_PKG
+          printf '%s\n' "@${OWNER_LOWER}:registry=https://npm.pkg.github.com" >> "$HOME/.npmrc"
+          printf '%s\n' "//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}" >> "$HOME/.npmrc"
+          node -e "const fs=require('fs');const path='packages/app/package.json';const pkg=require('./'+path);pkg.name=process.env.GH_PKG;fs.writeFileSync(path, JSON.stringify(pkg, null, 2)+'\\n');"
+          pnpm --filter ./packages/app publish --registry https://npm.pkg.github.com --no-git-checks
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub Release
+        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.release_version.outputs.version }}
+          generate_release_notes: true

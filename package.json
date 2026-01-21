@@ -1,25 +1,25 @@
 {
-  "name": "effect-template-workspace",
+  "name": "dist-deps-prune-workspace",
   "version": "1.0.0",
   "private": true,
-  "description": "Monorepo workspace for effect-template",
+  "description": "Monorepo workspace for dist-deps-prune",
   "packageManager": "pnpm@10.28.1",
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm --filter @effect-template/app build",
-    "check": "pnpm --filter @effect-template/app check",
+    "build": "pnpm --filter dist-deps-prune build",
+    "check": "pnpm --filter dist-deps-prune check",
     "changeset": "changeset",
     "changeset-publish": "node -e \"if (!process.env.NPM_TOKEN) { console.log('Skipping publish: NPM_TOKEN is not set'); process.exit(0); }\" && changeset publish",
     "changeset-version": "changeset version",
-    "dev": "pnpm --filter @effect-template/app dev",
-    "lint": "pnpm --filter @effect-template/app lint",
-    "lint:tests": "pnpm --filter @effect-template/app lint:tests",
-    "lint:effect": "pnpm --filter @effect-template/app lint:effect",
-    "test": "pnpm --filter @effect-template/app test",
-    "typecheck": "pnpm --filter @effect-template/app typecheck",
-    "start": "pnpm --filter @effect-template/app start"
+    "dev": "pnpm --filter dist-deps-prune dev",
+    "lint": "pnpm --filter dist-deps-prune lint",
+    "lint:tests": "pnpm --filter dist-deps-prune lint:tests",
+    "lint:effect": "pnpm --filter dist-deps-prune lint:effect",
+    "test": "pnpm --filter dist-deps-prune test",
+    "typecheck": "pnpm --filter dist-deps-prune typecheck",
+    "start": "pnpm --filter dist-deps-prune start"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.2",
@@ -27,12 +27,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ProverCoderAI/effect-template.git"
+    "url": "git+https://github.com/ProverCoderAI/dist-deps-prune.git"
   },
   "bugs": {
-    "url": "https://github.com/ProverCoderAI/effect-template/issues"
+    "url": "https://github.com/ProverCoderAI/dist-deps-prune/issues"
   },
-  "homepage": "https://github.com/ProverCoderAI/effect-template#readme",
+  "homepage": "https://github.com/ProverCoderAI/dist-deps-prune#readme",
   "license": "ISC",
   "pnpm": {
     "ignoredBuiltDependencies": [
