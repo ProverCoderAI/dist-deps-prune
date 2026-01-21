@@ -95,7 +95,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cp README.md packages/app/README.md
+          if [ -f README.md ]; then
+            cp README.md packages/app/README.md
+          else
+            echo "README.md not found; skipping copy."
+          fi
       - name: Configure npm auth
         if: github.actor != 'github-actions[bot]'
         shell: bash
