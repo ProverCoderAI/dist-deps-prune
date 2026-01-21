@@ -5,7 +5,7 @@ import { listDevDependenciesUsedInDist } from "../../src/core/invariants.js"
 import type { PackageJson } from "../../src/core/package-json.js"
 
 describe("listDevDependenciesUsedInDist", () => {
-  it.effect("returns sorted dev-only intersection of used and devDependencies", () =>
+  it.effect("returns sorted intersection of used and devDependencies", () =>
     Effect.sync(() => {
       const used = new Set<string>(["b", "a", "c", "p", "o", "z"])
       const pkg: PackageJson = {
@@ -30,6 +30,6 @@ describe("listDevDependenciesUsedInDist", () => {
         }
       }
       const result = listDevDependenciesUsedInDist(used, pkg)
-      expect(result).toEqual(["a", "z"])
+      expect(result).toEqual(["a", "b", "o", "p", "z"])
     }))
 })
