@@ -8,18 +8,18 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "pnpm --filter dist-deps-prune build",
-    "check": "pnpm --filter dist-deps-prune check",
+    "build": "pnpm --filter @prover-coder-ai/dist-deps-prune build",
+    "check": "pnpm --filter @prover-coder-ai/dist-deps-prune check",
     "changeset": "changeset",
     "changeset-publish": "node -e \"if (!process.env.NPM_TOKEN) { console.log('Skipping publish: NPM_TOKEN is not set'); process.exit(0); }\" && changeset publish",
     "changeset-version": "changeset version",
-    "dev": "pnpm --filter dist-deps-prune dev",
-    "lint": "pnpm --filter dist-deps-prune lint",
-    "lint:tests": "pnpm --filter dist-deps-prune lint:tests",
-    "lint:effect": "pnpm --filter dist-deps-prune lint:effect",
-    "test": "pnpm --filter dist-deps-prune test",
-    "typecheck": "pnpm --filter dist-deps-prune typecheck",
-    "start": "pnpm --filter dist-deps-prune start"
+    "dev": "pnpm --filter @prover-coder-ai/dist-deps-prune dev",
+    "lint": "pnpm --filter @prover-coder-ai/dist-deps-prune lint",
+    "lint:tests": "pnpm --filter @prover-coder-ai/dist-deps-prune lint:tests",
+    "lint:effect": "pnpm --filter @prover-coder-ai/dist-deps-prune lint:effect",
+    "test": "pnpm --filter @prover-coder-ai/dist-deps-prune test",
+    "typecheck": "pnpm --filter @prover-coder-ai/dist-deps-prune typecheck",
+    "start": "pnpm --filter @prover-coder-ai/dist-deps-prune start"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.2",
