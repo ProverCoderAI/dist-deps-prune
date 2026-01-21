@@ -12,7 +12,7 @@ import type { PackageJson } from "./package-json.js"
 // COMPLEXITY: O(n log n)
 
 const sortStrings = (values: ReadonlyArray<string>): ReadonlyArray<string> =>
-  [...values].sort((left, right) => left.localeCompare(right))
+  values.toSorted((left, right) => left.localeCompare(right))
 
 const listKeys = (map: Readonly<Record<string, string>> | undefined): ReadonlyArray<string> =>
   map === undefined ? [] : Object.keys(map)

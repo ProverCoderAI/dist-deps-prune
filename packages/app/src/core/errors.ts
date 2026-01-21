@@ -76,7 +76,6 @@ export const devDependencyInDist = (
 ): DevDependencyInDist => ({
   _tag: "DevDependencyInDist",
   packages,
-  message:
-    `dist imports packages from devDependencies: ${packages.join(", ")}\n` +
+  message: `dist imports packages from devDependencies: ${packages.join(", ")}\n` +
     "Move them to dependencies (runtime) or peerDependencies (plugin/host), then retry."
 })
