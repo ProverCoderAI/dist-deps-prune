@@ -3,6 +3,11 @@
   "version": "1.0.2",
   "description": "CLI to prune unused dependencies based on dist output",
   "main": "dist/main.js",
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "bin": {
     "dist-deps-prune": "dist/main.js"
   },

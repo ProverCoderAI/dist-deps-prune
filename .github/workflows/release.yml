@@ -53,6 +53,9 @@ jobs:
         run: pnpm changeset version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build dist for publish
+        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
+        run: pnpm --filter @prover-coder-ai/dist-deps-prune build
       - name: Read version
         id: release_version
         if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
@@ -113,6 +116,7 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish
+        if: steps.auto_changeset.outputs.has_changeset == 'true' && github.actor != 'github-actions[bot]'
         shell: bash
         run: |
           set -euo pipefail
@@ -121,7 +125,12 @@ jobs:
             echo "Version ${VERSION} already published; skipping npm publish."
             exit 0
           fi
-          pnpm changeset-publish
+          node packages/app/dist/main.js release \
+            --dist packages/app/dist \
+            --package packages/app/package.json \
+            --prune-dev true \
+            --command "pnpm changeset-publish" \
+            --silent
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Publish to GitHub Packages
