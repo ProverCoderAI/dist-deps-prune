@@ -52,14 +52,11 @@ describe("component-tagger integration", () => {
               )
             )
 
-            const distDir = path.join(repoDir, "packages", "app", "dist")
             const pkgPath = path.join(repoDir, "packages", "app", "package.json")
             const scanArgs = [
               "node",
               "cli",
               "scan",
-              "--dist",
-              distDir,
               "--package",
               pkgPath,
               "--silent"

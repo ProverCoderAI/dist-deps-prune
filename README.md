@@ -1,6 +1,6 @@
 # dist-deps-prune
 
-CLI utility that scans a built `dist/` directory to find **actually used** external packages, reports unused dependencies, and can prune `package.json` for release.
+CLI utility that scans published build outputs (from `package.json` `files`) to find **actually used** external packages, reports unused dependencies, and can prune `package.json` for release.
 
 ## Install
 
@@ -13,19 +13,19 @@ npm i -D @prover-coder-ai/dist-deps-prune
 ### Scan only
 
 ```bash
-npx @prover-coder-ai/dist-deps-prune scan --dist ./dist --package ./package.json
+npx @prover-coder-ai/dist-deps-prune scan --package ./package.json
 ```
 
 ### Apply pruning
 
 ```bash
-npx @prover-coder-ai/dist-deps-prune apply --dist ./dist --package ./package.json --write --prune-dev true
+npx @prover-coder-ai/dist-deps-prune apply --package ./package.json --write --prune-dev true
 ```
 
 ### Release mode (backup + restore)
 
 ```bash
-npx @prover-coder-ai/dist-deps-prune release --dist ./dist --package ./package.json --command "npm publish"
+npx @prover-coder-ai/dist-deps-prune release --package ./package.json --command "npm publish"
 ```
 
 ### Restore package.json
@@ -36,7 +36,7 @@ npx @prover-coder-ai/dist-deps-prune restore --package ./package.json
 
 ## CI/CD (Release workflow)
 
-Use the tool during release so only the `dist/`-used dependencies stay in the published package.
+Use the tool during release so only the published outputs’ dependencies stay in the package.
 Below is a minimal GitHub Actions snippet that builds, prunes, publishes, and restores automatically:
 
 ```yaml
@@ -46,7 +46,6 @@ Below is a minimal GitHub Actions snippet that builds, prunes, publishes, and re
 - name: Publish with dist-deps-prune (auto restore)
   run: |
     npx @prover-coder-ai/dist-deps-prune release \
-      --dist ./dist \
       --package ./package.json \
       --prune-dev true \
       --command "npm publish" \

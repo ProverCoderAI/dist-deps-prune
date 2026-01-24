@@ -12,7 +12,7 @@ describe("release mode restore", () => {
         yield* _(fs.makeDirectory(distDir, { recursive: true }))
         const pkgPath = path.join(tempDir, "package.json")
         const original =
-          `{\n  "name": "fixture",\n  "version": "1.0.0",\n  "dependencies": {\n    "a": "1.0.0"\n  }\n}\n`
+          `{\n  "name": "fixture",\n  "version": "1.0.0",\n  "files": [\n    "dist"\n  ],\n  "dependencies": {\n    "a": "1.0.0"\n  }\n}\n`
         yield* _(fs.writeFileString(pkgPath, original))
         const distFile = path.join(distDir, "index.js")
         yield* _(fs.writeFileString(distFile, `import "a"`))
@@ -21,8 +21,6 @@ describe("release mode restore", () => {
           "node",
           "cli",
           "release",
-          "--dist",
-          distDir,
           "--package",
           pkgPath,
           "--command",
