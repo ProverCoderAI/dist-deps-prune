@@ -1,4 +1,5 @@
-import type { Json } from "./json.js"
+import { defaultPatterns } from "./config.js"
+import type { Json, JsonObject } from "./json.js"
 import type { PackageJson } from "./package-json.js"
 import { isJsonObject } from "./package-json.js"
 
@@ -14,10 +15,7 @@ import { isJsonObject } from "./package-json.js"
 // COMPLEXITY: O(n) where n = number of inspected paths
 
 const normalizePath = (value: string): string => value.replaceAll("\\", "/")
-
-const stripDotSlash = (value: string): string =>
-  value.startsWith("./") ? value.slice(2) : value
-
+const stripDotSlash = (value: string): string => value.startsWith("./") ? value.slice(2) : value
 const findWildcardIndex = (value: string): number => {
   const star = value.indexOf("*")
   const question = value.indexOf("?")
@@ -29,78 +27,8 @@ const findWildcardIndex = (value: string): number => {
   }
   return Math.min(star, question)
 }
-
-const trimSlashes = (value: string): string =>
-  value.endsWith("/") ? value.slice(0, -1) : value
-
-const toStringArray = (value: Json | undefined): ReadonlyArray<string> => {
-  if (!Array.isArray(value)) {
-    return []
-  }
-  return value.filter((entry): entry is string => typeof entry === "string")
-}
-
-const readStringField = (value: Json | undefined): ReadonlyArray<string> =>
-  typeof value === "string" ? [value] : []
-
-const readBinField = (value: Json | undefined): ReadonlyArray<string> => {
-  if (typeof value === "string") {
-    return [value]
-  }
-  if (isJsonObject(value)) {
-    return Object.values(value).filter((entry): entry is string => typeof entry === "string")
-  }
-  return []
-}
-
-const collectExportPaths = (value: Json): ReadonlyArray<string> => {
-  if (typeof value === "string") {
-    return [value]
-  }
-  if (Array.isArray(value)) {
-    const result: Array<string> = []
-    for (const entry of value) {
-      result.push(...collectExportPaths(entry))
-    }
-    return result
-  }
-  if (isJsonObject(value)) {
-    const result: Array<string> = []
-    for (const entry of Object.values(value)) {
-      result.push(...collectExportPaths(entry))
-    }
-    return result
-  }
-  return []
-}
-
-const readExportsField = (value: Json | undefined): ReadonlyArray<string> =>
-  value === undefined ? [] : collectExportPaths(value)
-
-const hasJsExtension = (value: string): boolean => {
-  const normalized = normalizePath(value).toLowerCase()
-  return (
-    normalized.endsWith(".js") ||
-    normalized.endsWith(".mjs") ||
-    normalized.endsWith(".cjs") ||
-    normalized.endsWith(".node")
-  )
-}
-
-const topLevelFromPath = (value: string): string | undefined => {
-  const normalized = stripDotSlash(normalizePath(value))
-  const trimmed = normalized.startsWith("/") ? normalized.slice(1) : normalized
-  const [first, ...rest] = trimmed.split("/")
-  if (first === "" || first === "." || first === ".." || first.includes("*")) {
-    return undefined
-  }
-  if (rest.length === 0) {
-    return undefined
-  }
-  return first
-}
-
-const rootFromFilesEntry = (value: string): string | undefined => {
+const trimSlashes = (value: string): string => value.endsWith("/") ? value.slice(0, -1) : value
+const normalizeFilesEntry = (value: string): string | undefined => {
   const trimmed = value.trim()
   if (trimmed === "" || trimmed.startsWith("!")) {
     return undefined
@@ -110,61 +38,167 @@ const rootFromFilesEntry = (value: string): string | undefined => {
   if (sanitized === "" || sanitized === "." || sanitized === "..") {
     return undefined
   }
-  const wildcardIndex = findWildcardIndex(sanitized)
-  const prefix = wildcardIndex >= 0 ? sanitized.slice(0, wildcardIndex) : sanitized
+  return sanitized
+}
+const withNormalizedFilesEntry = <T>(
+  value: string,
+  toResult: (sanitized: string) => T | undefined
+): T | undefined => {
+  const sanitized = normalizeFilesEntry(value)
+  if (sanitized === undefined) {
+    return undefined
+  }
+  return toResult(sanitized)
+}
+const stripWildcardPrefix = (value: string): string => {
+  const wildcardIndex = findWildcardIndex(value)
+  return wildcardIndex >= 0 ? value.slice(0, wildcardIndex) : value
+}
+const normalizeFilesPrefix = (value: string): string | undefined => {
+  const prefix = stripWildcardPrefix(value)
   const withoutTrailing = trimSlashes(prefix)
   if (withoutTrailing === "" || withoutTrailing === "." || withoutTrailing === "..") {
     return undefined
   }
-  const segments = withoutTrailing.split("/")
-  const last = segments[segments.length - 1] ?? ""
+  return withoutTrailing
+}
+const deriveRootFromPrefix = (value: string): string | undefined => {
+  const segments = value.split("/")
+  const last = segments.at(-1)
+  if (last === undefined) {
+    return undefined
+  }
   const hasExtension = last.includes(".")
   if (segments.length === 1) {
-    return hasExtension ? undefined : withoutTrailing
+    return hasExtension ? undefined : value
   }
   if (hasExtension) {
     return segments.slice(0, -1).join("/")
   }
-  return withoutTrailing
+  return value
+}
+const toStringArray = (value: Json | undefined): ReadonlyArray<string> =>
+  Array.isArray(value) ? value.filter((entry): entry is string => typeof entry === "string") : []
+
+const readStringField = (value: Json | undefined): ReadonlyArray<string> => typeof value === "string" ? [value] : []
+
+const isJsonArray = (value: Json): value is ReadonlyArray<Json> => Array.isArray(value)
+
+const readBinField = (value: Json | undefined): ReadonlyArray<string> => {
+  if (value === undefined) {
+    return []
+  }
+  if (typeof value === "string") {
+    return [value]
+  }
+  if (isJsonObject(value)) {
+    const result: Array<string> = []
+    for (const key of Object.keys(value)) {
+      const entry = value[key]
+      if (typeof entry === "string") {
+        result.push(entry)
+      }
+    }
+    return result
+  }
+  return []
 }
 
-const topLevelFromFilesEntry = (value: string): string | undefined => {
-  const trimmed = value.trim()
-  if (trimmed.startsWith("!")) {
-    return undefined
-  }
-  const cleaned = stripDotSlash(normalizePath(trimmed))
-  const sanitized = cleaned.startsWith("/") ? cleaned.slice(1) : cleaned
-  if (sanitized === "" || sanitized === "." || sanitized === "..") {
-    return undefined
-  }
-  const [first, ...rest] = sanitized.split("/")
-  if (first.includes("*")) {
-    return undefined
-  }
-  if (rest.length > 0) {
-    return first
-  }
-  if (sanitized.endsWith("/")) {
-    return first
-  }
-  if (!first.includes(".")) {
-    return first
-  }
-  return undefined
-}
-
-const unique = (values: ReadonlyArray<string>): ReadonlyArray<string> => {
-  const seen = new Set<string>()
+const collectExportPathsFromArray = (value: ReadonlyArray<Json>): ReadonlyArray<string> => {
   const result: Array<string> = []
-  for (const value of values) {
-    if (!seen.has(value)) {
-      seen.add(value)
-      result.push(value)
+  for (const entry of value) {
+    const nested = collectExportPaths(entry)
+    for (const item of nested) {
+      result.push(item)
     }
   }
   return result
 }
+
+const collectExportPathsFromObject = (value: JsonObject): ReadonlyArray<string> => {
+  const result: Array<string> = []
+  for (const key of Object.keys(value)) {
+    const entry = value[key]
+    if (entry === undefined) {
+      continue
+    }
+    const nested = collectExportPaths(entry)
+    for (const item of nested) {
+      result.push(item)
+    }
+  }
+  return result
+}
+
+const collectExportPaths = (value: Json): ReadonlyArray<string> => {
+  if (typeof value === "string") {
+    return [value]
+  }
+  if (isJsonArray(value)) {
+    return collectExportPathsFromArray(value)
+  }
+  if (isJsonObject(value)) {
+    return collectExportPathsFromObject(value)
+  }
+  return []
+}
+
+const readExportsField = (value: Json | undefined): ReadonlyArray<string> =>
+  value === undefined ? [] : collectExportPaths(value)
+
+const hasJsExtension = (value: string): boolean =>
+  normalizePath(value).toLowerCase().endsWith(".js") ||
+  normalizePath(value).toLowerCase().endsWith(".mjs") ||
+  normalizePath(value).toLowerCase().endsWith(".cjs") ||
+  normalizePath(value).toLowerCase().endsWith(".node")
+
+const topLevelFromPath = (value: string): string | undefined => {
+  const normalized = stripDotSlash(normalizePath(value))
+  const trimmed = normalized.startsWith("/") ? normalized.slice(1) : normalized
+  const [first, ...rest] = trimmed.split("/")
+  const head = first ?? ""
+  if (head === "" || head === "." || head === ".." || head.includes("*")) {
+    return undefined
+  }
+  if (rest.length === 0) {
+    return undefined
+  }
+  return head
+}
+
+const rootFromFilesEntry = (value: string): string | undefined =>
+  withNormalizedFilesEntry(value, (sanitized) => {
+    const prefix = normalizeFilesPrefix(sanitized)
+    if (prefix === undefined) {
+      return
+    }
+    return deriveRootFromPrefix(prefix)
+  })
+
+const topLevelFromFilesEntry = (value: string): string | undefined =>
+  withNormalizedFilesEntry(value, (sanitized) => {
+    const segments = sanitized.split("/")
+    const head = segments[0] ?? ""
+    if (head === "" || head.includes("*")) {
+      return
+    }
+    if (segments.length > 1) {
+      return head
+    }
+    if (sanitized.endsWith("/")) {
+      return head
+    }
+    return head.includes(".") ? undefined : head
+  })
+
+const unique = (values: ReadonlyArray<string>): ReadonlyArray<string> => [...new Set(values)]
+
+const isBetterFrequency = (
+  best: string | undefined,
+  bestCount: number,
+  key: string,
+  count: number
+): boolean => count > bestCount || (count === bestCount && best !== undefined && key < best)
 
 const mostFrequent = (values: ReadonlyArray<string>): string | undefined => {
   if (values.length === 0) {
@@ -177,11 +211,9 @@ const mostFrequent = (values: ReadonlyArray<string>): string | undefined => {
   let best: string | undefined
   let bestCount = -1
   for (const [key, count] of counts.entries()) {
-    if (count > bestCount) {
+    if (isBetterFrequency(best, bestCount, key, count)) {
       best = key
       bestCount = count
-    } else if (count === bestCount && best !== undefined && key < best) {
-      best = key
     }
   }
   return best
@@ -215,20 +247,51 @@ const collectEntrypointPaths = (pkg: PackageJson): ReadonlyArray<string> => [
   ...readExportsField(pkg["exports"])
 ]
 
-const collectFilesDirs = (pkg: PackageJson): ReadonlyArray<string> =>
-  toStringArray(pkg["files"]).map(topLevelFromFilesEntry).filter((value): value is string => value !== undefined)
+const collectFilesDirs = (pkg: PackageJson): ReadonlyArray<string> => {
+  const result: Array<string> = []
+  for (const entry of toStringArray(pkg["files"])) {
+    const value = topLevelFromFilesEntry(entry)
+    if (value !== undefined) {
+      result.push(value)
+    }
+  }
+  return result
+}
 
-const collectReleaseRoots = (pkg: PackageJson): ReadonlyArray<string> =>
-  toStringArray(pkg["files"]).map(rootFromFilesEntry).filter((value): value is string => value !== undefined)
+const collectReleaseRoots = (pkg: PackageJson): ReadonlyArray<string> => {
+  const result: Array<string> = []
+  for (const entry of toStringArray(pkg["files"])) {
+    const value = rootFromFilesEntry(entry)
+    if (value !== undefined) {
+      result.push(value)
+    }
+  }
+  return result
+}
 
-const collectEntrypointDirs = (paths: ReadonlyArray<string>): ReadonlyArray<string> =>
-  paths.map(topLevelFromPath).filter((value): value is string => value !== undefined)
+const collectEntrypointDirs = (paths: ReadonlyArray<string>): ReadonlyArray<string> => {
+  const result: Array<string> = []
+  for (const entry of paths) {
+    const value = topLevelFromPath(entry)
+    if (value !== undefined) {
+      result.push(value)
+    }
+  }
+  return result
+}
 
-const collectJsEntrypointDirs = (paths: ReadonlyArray<string>): ReadonlyArray<string> =>
-  paths
-    .filter(hasJsExtension)
-    .map(topLevelFromPath)
-    .filter((value): value is string => value !== undefined)
+const collectJsEntrypointDirs = (paths: ReadonlyArray<string>): ReadonlyArray<string> => {
+  const result: Array<string> = []
+  for (const entry of paths) {
+    if (hasJsExtension(entry)) {
+      const value = topLevelFromPath(entry)
+      if (value !== undefined) {
+        result.push(value)
+      }
+    }
+  }
+  return result
+}
 
 /**
  * Infer the top-level dist directory from package.json metadata.
@@ -270,13 +333,6 @@ export const inferDistDirFromPackageJson = (pkg: PackageJson): string | undefine
 export const inferDistRootsFromPackageJson = (pkg: PackageJson): ReadonlyArray<string> =>
   unique(collectReleaseRoots(pkg))
 
-const patternsForDistPath = (distPath: string): ReadonlyArray<string> => [
-  `${distPath}/**/*.js`,
-  `${distPath}/**/*.mjs`,
-  `${distPath}/**/*.cjs`,
-  `${distPath}/**/*.d.ts`
-]
-
 // CHANGE: build scan patterns for multiple dist roots
 // WHY: support scanning all published directories from package.json files
 // QUOTE(TZ): "их надо анализировать"
@@ -289,4 +345,4 @@ const patternsForDistPath = (distPath: string): ReadonlyArray<string> => [
 // COMPLEXITY: O(n)
 export const buildPatternsForDistPaths = (
   distPaths: ReadonlyArray<string>
-): ReadonlyArray<string> => unique(distPaths.flatMap((distPath) => patternsForDistPath(distPath)))
+): ReadonlyArray<string> => unique(distPaths.flatMap((distPath) => defaultPatterns(distPath)))

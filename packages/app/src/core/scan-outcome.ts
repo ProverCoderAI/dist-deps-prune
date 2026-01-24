@@ -36,3 +36,23 @@ export const mergeScanOutcomes = (left: ScanOutcome, right: ScanOutcome): ScanOu
     importsFound: left.stats.importsFound + right.stats.importsFound
   }
 })
+
+// CHANGE: aggregate multiple scan outcomes without Array.reduce
+// WHY: comply with lint rules while preserving pure aggregation
+// QUOTE(TZ): "их надо анализировать"
+// REF: req-dist-files-4
+// SOURCE: n/a
+// FORMAT THEOREM: ∀xs: used(mergeAll(xs)) = ⋃ used(x)
+// PURITY: CORE
+// EFFECT: n/a
+// INVARIANT: stats are additive across outcomes
+// COMPLEXITY: O(n + m)
+export const mergeAllScanOutcomes = (
+  outcomes: ReadonlyArray<ScanOutcome>
+): ScanOutcome => {
+  let merged = emptyScanOutcome
+  for (const outcome of outcomes) {
+    merged = mergeScanOutcomes(merged, outcome)
+  }
+  return merged
+}
