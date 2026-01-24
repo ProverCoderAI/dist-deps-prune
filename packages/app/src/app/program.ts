@@ -9,18 +9,25 @@ import * as Exit from "effect/Exit"
 import type { CliArgs } from "../core/cli.js"
 import { parseCliArgs } from "../core/cli.js"
 import { resolveConfig } from "../core/config.js"
+import type { PackageJson } from "../core/package-json.js"
 import { type AppError, devDependencyInDist } from "../core/errors.js"
 import { listDevDependenciesUsedInDist } from "../core/invariants.js"
 import type { PrunePlan } from "../core/prune.js"
 import { buildPrunePlan } from "../core/prune.js"
 import { buildReport, renderHumanReport, renderJsonReport } from "../core/report.js"
 import type { Report } from "../core/types.js"
+import {
+  buildPatternsForDistPaths,
+  inferDistDirFromPackageJson,
+  inferDistRootsFromPackageJson
+} from "../core/dist-path.js"
 import { loadBuiltinModules } from "../shell/builtins.js"
 import { runCommand } from "../shell/command.js"
 import { loadConfigFile } from "../shell/config-file.js"
 import { readPackageJson, writePackageJson } from "../shell/package-json.js"
 import { ensureBackup, restorePackageJson } from "../shell/release.js"
 import { scanDist } from "../shell/scan.js"
+import { emptyScanOutcome, mergeScanOutcomes } from "../core/scan-outcome.js"
 
 // CHANGE: orchestrate CLI modes with functional core + imperative shell
 // WHY: enforce single entrypoint with typed errors and deterministic outputs
@@ -44,6 +51,31 @@ type ProgramEnv = FileSystemService | PathService | CommandExecutor
 interface AnalyzeResult {
   readonly report: Report
   readonly plan: PrunePlan
+}
+
+// CHANGE: resolve dist path from package.json when --dist is not provided
+// WHY: support non-standard build output directories without extra CLI flags
+// QUOTE(TZ): "анализировал где смотреть запакованную версию исходя из package.json"
+// REF: req-dist-infer-2
+// SOURCE: n/a
+// FORMAT THEOREM: ∀cli,pkg: dist(cli,pkg)=cli.dist if explicit else join(dirname(pkg), infer(pkg) ?? cli.dist)
+// PURITY: SHELL
+// EFFECT: n/a
+// INVARIANT: resolved distPath is deterministic for fixed inputs
+// COMPLEXITY: O(1)
+const resolveDistPath = (
+  cli: CliArgs,
+  pkg: PackageJson,
+  path: PathService
+): string => {
+  if (cli.distExplicit) {
+    return cli.dist
+  }
+  const inferred = inferDistDirFromPackageJson(pkg)
+  if (inferred === undefined) {
+    return cli.dist
+  }
+  return path.join(path.dirname(cli.packagePath), inferred)
 }
 
 const emptyReport: Report = {
@@ -103,18 +135,45 @@ const analyzeProject = (
   Effect.gen(function*(_) {
     const configPath = cli.ignorePath ?? "./.dist-deps-prune.json"
     const configFile = yield* _(loadConfigFile(configPath, cli.ignorePathExplicit))
-    const resolved = resolveConfig(cli, configFile)
+    const pkg = yield* _(readPackageJson(cli.packagePath))
+    const path = yield* _(Path)
+    const hasCustomPatterns = cli.patterns !== undefined || configFile?.patterns !== undefined
+    const distRoots = cli.distExplicit ? [] : inferDistRootsFromPackageJson(pkg)
+    const shouldUseFiles = distRoots.length > 0 && !hasCustomPatterns
+    const packageDir = path.dirname(cli.packagePath)
+    const distPaths = shouldUseFiles
+      ? distRoots.map((root) => path.join(packageDir, root))
+      : []
+    const distPath = shouldUseFiles ? distPaths[0] ?? cli.dist : resolveDistPath(cli, pkg, path)
+    const patterns = shouldUseFiles ? buildPatternsForDistPaths(distPaths) : undefined
+    const resolved = resolveConfig(
+      patterns === undefined ? { ...cli, dist: distPath } : { ...cli, dist: distPath, patterns },
+      configFile
+    )
     const builtins = yield* _(loadBuiltinModules)
     const scan = yield* _(
-      scanDist({
-        distPath: cli.dist,
-        patterns: resolved.patterns,
-        ignorePatterns: resolved.ignorePatterns,
-        strict: cli.strict,
-        builtins
-      })
+      shouldUseFiles
+        ? Effect.forEach(distPaths, (current) =>
+          scanDist({
+            distPath: current,
+            patterns: resolved.patterns,
+            ignorePatterns: resolved.ignorePatterns,
+            strict: cli.strict,
+            builtins
+          }), { concurrency: 1 }
+        ).pipe(
+          Effect.map((outcomes) =>
+            outcomes.reduce(mergeScanOutcomes, emptyScanOutcome)
+          )
+        )
+        : scanDist({
+          distPath,
+          patterns: resolved.patterns,
+          ignorePatterns: resolved.ignorePatterns,
+          strict: cli.strict,
+          builtins
+        })
     )
-    const pkg = yield* _(readPackageJson(cli.packagePath))
     const usedInDev = listDevDependenciesUsedInDist(scan.used, pkg)
     if (usedInDev.length > 0) {
       return yield* _(Effect.fail(devDependencyInDist(usedInDev)))

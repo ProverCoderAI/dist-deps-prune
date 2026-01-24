@@ -17,6 +17,7 @@ export type CliCommand = "scan" | "apply" | "release" | "restore"
 export interface CliArgs {
   readonly command: CliCommand
   readonly dist: string
+  readonly distExplicit: boolean
   readonly packagePath: string
   readonly ignorePath: string | undefined
   readonly ignorePathExplicit: boolean
@@ -67,6 +68,7 @@ const parseCommand = (value: string): Either.Either<CliCommand, CliError> =>
 const defaultArgs = (command: CliCommand): CliArgs => ({
   command,
   dist: "./dist",
+  distExplicit: false,
   packagePath: "./package.json",
   ignorePath: undefined,
   ignorePathExplicit: false,
@@ -148,7 +150,8 @@ const flagParsers: Record<string, FlagParser> = {
   dist: (current, inlineValue, nextValue) =>
     parseValueFlag("dist", current, inlineValue, nextValue, (args, value) => ({
       ...args,
-      dist: value
+      dist: value,
+      distExplicit: true
     })),
   package: (current, inlineValue, nextValue) =>
     parseValueFlag("package", current, inlineValue, nextValue, (args, value) => ({
