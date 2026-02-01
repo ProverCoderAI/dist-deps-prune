@@ -79,8 +79,8 @@ importers:
         specifier: ^4.6.0
         version: 4.6.0(eslint@9.39.2(jiti@2.6.1))
       '@eslint/compat':
-        specifier: 2.0.1
-        version: 2.0.1(eslint@9.39.2(jiti@2.6.1))
+        specifier: 2.0.2
+        version: 2.0.2(eslint@9.39.2(jiti@2.6.1))
       '@eslint/eslintrc':
         specifier: 3.3.3
         version: 3.3.3
@@ -133,11 +133,11 @@ importers:
         specifier: ^62.0.0
         version: 62.0.0(eslint@9.39.2(jiti@2.6.1))
       globals:
-        specifier: ^17.2.0
-        version: 17.2.0
+        specifier: ^17.3.0
+        version: 17.3.0
       jscpd:
-        specifier: ^4.0.7
-        version: 4.0.7
+        specifier: ^4.0.8
+        version: 4.0.8
       typescript-eslint:
         specifier: ^8.54.0
         version: 8.54.0(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
@@ -653,11 +653,11 @@ packages:
     resolution: {integrity: sha512-EriSTlt5OC9/7SXkRSCAhfSxxoSUgBm33OH+IkwbdpgoqsSsUg7y3uh+IICI/Qg4BBWr3U2i39RpmycbxMq4ew==}
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
 
-  '@eslint/compat@2.0.1':
-    resolution: {integrity: sha512-yl/JsgplclzuvGFNqwNYV4XNPhP3l62ZOP9w/47atNAdmDtIFCx6X7CSk/SlWUuBGkT4Et/5+UD+WyvX2iiIWA==}
+  '@eslint/compat@2.0.2':
+    resolution: {integrity: sha512-pR1DoD0h3HfF675QZx0xsyrsU8q70Z/plx7880NOhS02NuWLgBCOMDL787nUeQ7EWLkxv3bPQJaarjcPQb2Dwg==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
     peerDependencies:
-      eslint: ^8.40 || 9
+      eslint: ^8.40 || 9 || 10
     peerDependenciesMeta:
       eslint:
         optional: true
@@ -674,8 +674,8 @@ packages:
     resolution: {integrity: sha512-yL/sLrpmtDaFEiUj1osRP4TI2MDz1AddJL+jZ7KSqvBuliN4xqYY54IfdN8qD8Toa6g1iloph1fxQNkjOxrrpQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@eslint/core@1.0.1':
-    resolution: {integrity: sha512-r18fEAj9uCk+VjzGt2thsbOmychS+4kxI14spVNibUO2vqKX7obOG+ymZljAwuPZl+S3clPGwCwTDtrdqTiY6Q==}
+  '@eslint/core@1.1.0':
+    resolution: {integrity: sha512-/nr9K9wkr3P1EzFTdFdMoLuo1PmIxjmwvPozwoSodjNBdefGujXQUF93u1DDZpEaTuDvMsIQddsd35BwtrW9Xw==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
 
   '@eslint/eslintrc@3.3.3':
@@ -759,20 +759,20 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@jscpd/badge-reporter@4.0.3':
-    resolution: {integrity: sha512-ZDBQzbVRK2v9U1yxHIkvzbwBMgSHTZM4s0vbiDf9NKBwrpxiAvSYWSwdAtlC8xQeMpJlBNls/cTXakXmiKGb8g==}
+  '@jscpd/badge-reporter@4.0.4':
+    resolution: {integrity: sha512-I9b4MmLXPM2vo0SxSUWnNGKcA4PjQlD3GzXvFK60z43cN/EIdLbOq3FVwCL+dg2obUqGXKIzAm7EsDFTg0D+mQ==}
 
-  '@jscpd/core@4.0.3':
-    resolution: {integrity: sha512-7C//TeHQlyt0Tm/jEynir4VsyWpVmwS6GPzw0mPPhgYE1/5F6knYYWQiwUZEEAEfNwkwW3EoG4YcKPAkdOJISA==}
+  '@jscpd/core@4.0.4':
+    resolution: {integrity: sha512-QGMT3iXEX1fI6lgjPH+x8eyJwhwr2KkpSF5uBpjC0Z5Xloj0yFTFLtwJT+RhxP/Ob4WYrtx2jvpKB269oIwgMQ==}
 
-  '@jscpd/finder@4.0.3':
-    resolution: {integrity: sha512-qHi5jlG/8s2uF3Kr6QX1zZEwpj8L8RRHSHQekQxOyqm9sgWqXaaIgoR1+dZqn+XhQWFXhY8CKrrFS9T6u6GKUg==}
+  '@jscpd/finder@4.0.4':
+    resolution: {integrity: sha512-qVUWY7Nzuvfd5OIk+n7/5CM98LmFroLqblRXAI2gDABwZrc7qS+WH2SNr0qoUq0f4OqwM+piiwKvwL/VDNn/Cg==}
 
-  '@jscpd/html-reporter@4.0.3':
-    resolution: {integrity: sha512-1WxywVjdx35Kd1X1S2gfMJ9Tod1NDDMpmctP9ybVZURjq3xdShDiShg5ry2kj+1qOBqMnMVvc21r9AD+IwEK2g==}
+  '@jscpd/html-reporter@4.0.4':
+    resolution: {integrity: sha512-YiepyeYkeH74Kx59PJRdUdonznct0wHPFkf6FLQN+mCBoy6leAWCcOfHtcexnp+UsBFDlItG5nRdKrDSxSH+Kg==}
 
-  '@jscpd/tokenizer@4.0.3':
-    resolution: {integrity: sha512-EosztK2+i2TPnLZuroC5jfvSPVuSDRsPtrAOL2UhwNttcK3L8F0/ERih6zRySMNUgL77OOhch5QX0I3YE8HLcQ==}
+  '@jscpd/tokenizer@4.0.4':
+    resolution: {integrity: sha512-xxYYY/qaLah/FlwogEbGIxx9CjDO+G9E6qawcy26WwrflzJb6wsnhjwdneN6Wb0RNCDsqvzY+bzG453jsin4UQ==}
 
   '@manypkg/find-root@1.1.0':
     resolution: {integrity: sha512-mki5uBvhHzO8kYYix/WRy2WX8S3B5wdVSc9D6KcU5lQNglP2yt58/VfLuAK49glRXChosY8ap2oJ1qgma3GUVA==}
@@ -2177,8 +2177,8 @@ packages:
     resolution: {integrity: sha512-c/c15i26VrJ4IRt5Z89DnIzCGDn9EcebibhAOjw5ibqEHsE1wLUgkPn9RDmNcUKyU87GeaL633nyJ+pplFR2ZQ==}
     engines: {node: '>=18'}
 
-  globals@17.2.0:
-    resolution: {integrity: sha512-tovnCz/fEq+Ripoq+p/gN1u7l6A7wwkoBT9pRCzTHzsD/LvADIzXZdjmRymh5Ztf0DYC3Rwg5cZRYjxzBmzbWg==}
+  globals@17.3.0:
+    resolution: {integrity: sha512-yMqGUQVVCkD4tqjOJf3TnrvaaHDMYp4VlUSObbkIiuCPe/ofdMBFIAcBbCSRFWOnos6qRiTVStDwqPLUclaxIw==}
     engines: {node: '>=18'}
 
   globalthis@1.0.4:
@@ -2496,11 +2496,11 @@ packages:
   jscpd-sarif-reporter@4.0.3:
     resolution: {integrity: sha512-0T7KiWiDIVArvlBkvCorn2NFwQe7p7DJ37o4YFRuPLDpcr1jNHQlEfbFPw8hDdgJ4hpfby6A5YwyHqASKJ7drA==}
 
-  jscpd-sarif-reporter@4.0.5:
-    resolution: {integrity: sha512-cD1MtUdpomUPM5C0YD0vKZmdj+Gyr0KD5Bk47yGMrPCtwtgsK+7v59OzBIUjYOL8AuxNAt6hvPFo0PH+PYJh0Q==}
+  jscpd-sarif-reporter@4.0.6:
+    resolution: {integrity: sha512-b9Sm3IPZ3+m8Lwa4gZa+4/LhDhlc/ZLEsLXKSOy1DANQ6kx0ueqZT+fUHWEdQ6m0o3+RIVIa7DmvLSojQD05ng==}
 
-  jscpd@4.0.7:
-    resolution: {integrity: sha512-ftw3OKgJUmAoS48TqeNOPRQbBdzzapKPF7L8auMKAp04kdOtoUuMonjVN0mruzb0zWObsh6CIWM78fzeeU29AA==}
+  jscpd@4.0.8:
+    resolution: {integrity: sha512-d2VNT/2Hv4dxT2/59He8Lyda4DYOxPRyRG9zBaOpTZAqJCVf2xLrBlZkT8Va6Lo9u3X2qz8Bpq4HrDi4JsrQhA==}
     hasBin: true
 
   jsesc@3.1.0:
@@ -4065,9 +4065,9 @@ snapshots:
 
   '@eslint-community/regexpp@4.12.2': {}
 
-  '@eslint/compat@2.0.1(eslint@9.39.2(jiti@2.6.1))':
+  '@eslint/compat@2.0.2(eslint@9.39.2(jiti@2.6.1))':
     dependencies:
-      '@eslint/core': 1.0.1
+      '@eslint/core': 1.1.0
     optionalDependencies:
       eslint: 9.39.2(jiti@2.6.1)
 
@@ -4087,7 +4087,7 @@ snapshots:
     dependencies:
       '@types/json-schema': 7.0.15
 
-  '@eslint/core@1.0.1':
+  '@eslint/core@1.1.0':
     dependencies:
       '@types/json-schema': 7.0.15
 
@@ -4183,20 +4183,20 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
 
-  '@jscpd/badge-reporter@4.0.3':
+  '@jscpd/badge-reporter@4.0.4':
     dependencies:
       badgen: 3.2.3
       colors: 1.4.0
       fs-extra: 11.3.2
 
-  '@jscpd/core@4.0.3':
+  '@jscpd/core@4.0.4':
     dependencies:
       eventemitter3: 5.0.1
 
-  '@jscpd/finder@4.0.3':
+  '@jscpd/finder@4.0.4':
     dependencies:
-      '@jscpd/core': 4.0.3
-      '@jscpd/tokenizer': 4.0.3
+      '@jscpd/core': 4.0.4
+      '@jscpd/tokenizer': 4.0.4
       blamer: 1.0.7
       bytes: 3.1.2
       cli-table3: 0.6.5
@@ -4206,15 +4206,15 @@ snapshots:
       markdown-table: 2.0.0
       pug: 3.0.3
 
-  '@jscpd/html-reporter@4.0.3':
+  '@jscpd/html-reporter@4.0.4':
     dependencies:
       colors: 1.4.0
       fs-extra: 11.3.2
       pug: 3.0.3
 
-  '@jscpd/tokenizer@4.0.3':
+  '@jscpd/tokenizer@4.0.4':
     dependencies:
-      '@jscpd/core': 4.0.3
+      '@jscpd/core': 4.0.4
       reprism: 0.0.11
       spark-md5: 3.0.2
 
@@ -4430,7 +4430,7 @@ snapshots:
       ajv: 8.17.1
       effect: 3.19.15
       jiti: 2.6.1
-      jscpd: 4.0.7
+      jscpd: 4.0.8
       jscpd-sarif-reporter: 4.0.3
       loop-controls: 1.1.0
       ts-pattern: 5.9.0
@@ -5762,7 +5762,7 @@ snapshots:
 
   globals@16.5.0: {}
 
-  globals@17.2.0: {}
+  globals@17.3.0: {}
 
   globalthis@1.0.4:
     dependencies:
@@ -6088,24 +6088,24 @@ snapshots:
       fs-extra: 11.3.2
       node-sarif-builder: 2.0.3
 
-  jscpd-sarif-reporter@4.0.5:
+  jscpd-sarif-reporter@4.0.6:
     dependencies:
       colors: 1.4.0
       fs-extra: 11.3.2
       node-sarif-builder: 3.4.0
 
-  jscpd@4.0.7:
+  jscpd@4.0.8:
     dependencies:
-      '@jscpd/badge-reporter': 4.0.3
-      '@jscpd/core': 4.0.3
-      '@jscpd/finder': 4.0.3
-      '@jscpd/html-reporter': 4.0.3
-      '@jscpd/tokenizer': 4.0.3
+      '@jscpd/badge-reporter': 4.0.4
+      '@jscpd/core': 4.0.4
+      '@jscpd/finder': 4.0.4
+      '@jscpd/html-reporter': 4.0.4
+      '@jscpd/tokenizer': 4.0.4
       colors: 1.4.0
       commander: 5.1.0
       fs-extra: 11.3.2
       gitignore-to-glob: 0.3.0
-      jscpd-sarif-reporter: 4.0.5
+      jscpd-sarif-reporter: 4.0.6
 
   jsesc@3.1.0: {}
 
