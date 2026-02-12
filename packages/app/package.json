@@ -1,6 +1,6 @@
 {
   "name": "@prover-coder-ai/dist-deps-prune",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "CLI to prune unused dependencies based on dist output",
   "main": "dist/main.js",
   "files": [
