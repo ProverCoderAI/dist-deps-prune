@@ -92,7 +92,7 @@
     "globals": "^17.3.0",
     "jscpd": "^4.0.8",
     "vite": "^7.3.1",
-    "vite-tsconfig-paths": "^6.1.0",
+    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.0.18"
   }
 }
